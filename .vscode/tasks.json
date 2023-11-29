@@ -1,0 +1,19 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "shell",
+			"command": "./../electron .",
+			"args": [
+				"main.js" //this should point to the location of your main.js file or the file you want to launch first
+			],
+			"problemMatcher": [],
+			"label": "Run Electron App",
+			"detail": "Just launch program",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		}
+	]
+}
