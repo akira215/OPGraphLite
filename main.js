@@ -196,11 +196,7 @@ app.whenReady().then(() => {
 		}
 	});
 
-	// Listening to renderer event that inform that all saving stuff has been performed
-	ipcMain.on('readyToQuit',  (_event) => {
-		readyToQuit = true;
-		mainWindow.close();
-	});
+	
   
 
 	app.on('activate', () => {
@@ -213,9 +209,26 @@ app.whenReady().then(() => {
 			mainWindow = null
 	});
 
+	// Listening to renderer event that inform that all saving stuff has been performed
+	ipcMain.on('readyToQuit',  (_event) => {
+		readyToQuit = true;
+		mainWindow.close();
+	});
+
+	ipcMain.handle('dialog:openList', handlePluginList)
+
 	ipcMain.on('notImplemented', (e)=>showNotification ('Not yet implemented bro', 'Hey, guy')); //TODO
 
 });
+
+async function handlePluginList () {
+	// Return the list of Available Plugin
+	let list = ['ak','bc','tt'];
+	return list;
+}
+  
+
+
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {

@@ -7,6 +7,7 @@ Graphical editor to edit Open Posit Hardware configuration .
 npm install electron --save-dev
 npm install --save-dev @electron-forge/cli
 npx electron-forge import
+npm install --save-dev bootstrap
 
 npm install
 ```
