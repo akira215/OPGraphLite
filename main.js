@@ -40,7 +40,7 @@ const templateMenu = [
 						height: 768,
 						backgroundColor: 'lightgray',
 						title: config.productName + ' Theme Editor',
-    					icon: path.join(__dirname, 'app','img', '68013_pin_orange_location_icon.png'),
+    					icon: path.join(__dirname, 'app','img', 'OPicon.png'),
 						parent:  mainWindow,
 						// modal: true,
 						webPreferences: {
@@ -64,7 +64,7 @@ const templateMenu = [
 						height: 768,
 						backgroundColor: 'lightgray',
 						title: config.productName + ' Test',
-    					icon: path.join(__dirname, 'app','img', '68013_pin_orange_location_icon.png'),
+    					icon: path.join(__dirname, 'app','img', 'OPicon.png'),
 						parent:  mainWindow,
 						// modal: true,
 						webPreferences: {
@@ -128,7 +128,7 @@ const createWindow = () => {
     height: 768,
     backgroundColor: 'lightgray',
 		title: config.productName,
-    icon: path.join(__dirname, 'app','img', '68013_pin_orange_location_icon.png'),
+    icon: path.join(__dirname, 'app','img', 'OPicon.png'),
     webPreferences: {
 			preload: path.join(__dirname, 'app','js','preload.js'),
 			nodeIntegration: true,
