@@ -130,8 +130,9 @@ const createWindow = () => {
 		title: config.productName,
     icon: path.join(__dirname, 'app','img', '68013_pin_orange_location_icon.png'),
     webPreferences: {
+			preload: path.join(__dirname, 'app','js','preload.js'),
 			nodeIntegration: true,
-			contextIsolation: false,
+			//contextIsolation: false,
 			enableRemoteModule: true,
 		},
     show: false,
@@ -194,6 +195,12 @@ app.whenReady().then(() => {
 			mainWindow.webContents.send('applicationAboutToQuit');
 		}
 	});
+
+	// Listening to renderer event that inform that all saving stuff has been performed
+	ipcMain.on('readyToQuit',  (_event) => {
+		readyToQuit = true;
+		mainWindow.close();
+	});
   
 
 	app.on('activate', () => {
@@ -204,12 +211,6 @@ app.whenReady().then(() => {
 
 	mainWindow.on('closed', function () {
 			mainWindow = null
-		});
-
-	// Listening to renderer event that inform that all saving stuff has been performed
-	ipcMain.on('readyToQuit', function () {
-		readyToQuit = true;
-		mainWindow.close();
 	});
 
 	ipcMain.on('notImplemented', (e)=>showNotification ('Not yet implemented bro', 'Hey, guy')); //TODO
