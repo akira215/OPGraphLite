@@ -131,9 +131,9 @@ const createWindow = () => {
     icon: path.join(__dirname, 'app','img', 'OPicon.png'),
     webPreferences: {
 			preload: path.join(__dirname, 'app','js','preload.js'),
-			nodeIntegration: true,
-			//contextIsolation: false,
-			enableRemoteModule: true,
+			//nodeIntegration: true,
+			//contextIsolation: true,
+			//enableRemoteModule: true,
 		},
     show: false,
   })

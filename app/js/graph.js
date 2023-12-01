@@ -6,17 +6,25 @@
 //ipc.on('applicationAboutToQuit', (evt) => ipc.send('readyToQuit'));
 
 
-const information = document.getElementById('info')
 const btn = document.getElementById('btn')
-const filePathElement = document.getElementById('filePath')
-
-information.innerText = `This app is using Chrome (v${electronAPI.chrome()}), Node.js (v${electronAPI.node()}), and Electron (v${electronAPI.electron()})`
+const pluginListElement = document.getElementById('pluginList')
 
 window.electronAPI.onAppQuit((event) => {
     event.sender.send('readyToQuit');
 })
 
 btn.addEventListener('click', async () => {
-    const pluginList = await window.electronAPI.openList()
-    filePathElement.innerText = filePath
+    const pluginList = await window.electronAPI.openList();
+    //pluginListElement.innerText = filePath
+    var i=0;
+    let statement = new Array(3);
+    for(i=0;i<pluginList.length;i++)
+    {
+        statement[i]="<li class=\"nav-item\"><a href=\"#\" id=\"plugin-id" + i + 
+            "\" class=\"nav-link text-white\">"+pluginList[i]+
+                "</a></li>";
+        console.log(statement[i]);
+        pluginListElement.innerHTML+=statement[i];
+    }
+
   })
