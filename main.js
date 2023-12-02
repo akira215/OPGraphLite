@@ -4,7 +4,10 @@ const os = require('os')
 const path = require('path')
 const { app, BrowserWindow, ipcMain, globalShortcut, Menu, Notification} = require('electron')
 
-//const fa_icons = require('@fortawesome/fontawesome-free')
+
+const pluginFolder = '../plugins/';
+const pluginFile = 'op_plugin.json';
+
 const config = require(path.join(__dirname, 'package.json'))
 
 app.setName(config.productName)
@@ -215,18 +218,51 @@ app.whenReady().then(() => {
 		mainWindow.close();
 	});
 
-	ipcMain.handle('dialog:openList', handlePluginList)
+	//ipcMain.handle('dialog:openList', generatePluginList)
+
+	ipcMain.on('openList', generatePluginList)
 
 	ipcMain.on('notImplemented', (e)=>showNotification ('Not yet implemented bro', 'Hey, guy')); //TODO
 
 });
 
-async function handlePluginList () {
-	// Return the list of Available Plugin
-	let list = ['ak','bc','tt'];
-	return list;
+
+// Generate the plugin list and send a signal to renderer each a time a new one is discover
+async function generatePluginList () {
+	
+	const fs = require('fs');
+	
+	fs.readdir(pluginFolder, (err, files) => {
+		try {
+			files.forEach(file => {
+				if (fs.statSync(pluginFolder + '/' + file).isDirectory()) {
+					// Try to read 
+					if (fs.existsSync(pluginFolder + '/' + file + '/' + pluginFile)) {
+						let jsonData = require(pluginFolder + "/" + file + "/" + pluginFile);
+						if (isValidPlugin(jsonData)){
+							mainWindow.webContents.send('appendPlugin', jsonData);
+						} else {
+							console.error(pluginFolder + "/" + file + "/" + pluginFile + " is invalid" )
+						}
+					} else {
+						console.error(pluginFolder + "/" + file + "/" + pluginFile + " doesn't exist" )
+					}
+				}
+			  });
+		} catch(err) {
+			console.error(err)
+		}
+	});
 }
-  
+
+//return true if the JSON object contain the minimum require value
+function isValidPlugin(pluginJSON) {
+	let result = true;
+	result &&= pluginJSON.hasOwnProperty('name');
+	result &&= pluginJSON.hasOwnProperty('inputs');
+	result &&= pluginJSON.hasOwnProperty('outputs');
+	return result;
+}
 
 
 

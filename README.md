@@ -8,6 +8,8 @@ npm install electron --save-dev
 npm install --save-dev @electron-forge/cli
 npx electron-forge import
 npm install --save-dev bootstrap
+npm i bootstrap-icons
+
 
 npm install
 ```
