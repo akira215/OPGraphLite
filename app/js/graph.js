@@ -1,73 +1,32 @@
 'use strict'
 
-var availablePlugin = []; // List of JSON plugin object available on the hard disk
+const canvasEl =  document.getElementById('graph');
+const parent = document.getElementById('graphContainer');
 
 
-const pluginListElement = document.getElementById('pluginList')
-const searchBar = document.getElementById('search-bar');
 
+var graph = new LGraph();
 
-window.electronAPI.onAppQuit((event) => {
-    event.sender.send('readyToQuit');
-});
+var canvas = new LGraphCanvas("#graph", graph);
 
-// as soon as the DOM is loaded, load the available plugin
+var node_const = LiteGraph.createNode("basic/const");
+node_const.pos = [200,200];
+graph.add(node_const);
+node_const.setValue(4.5);
+
+var node_watch = LiteGraph.createNode("basic/watch");
+node_watch.pos = [700,200];
+graph.add(node_watch);
+
+node_const.connect(0, node_watch, 0 );
+
+graph.start()
+
+// as soon as the DOM is loaded, resize the canvas to fill space
 document.addEventListener("DOMContentLoaded", (event) => {
-	window.electronAPI.openList();
-	console.log('trigger the plugin exploration')
+    canvas.resize();
 });
 
-
-// Add the new plugin entry in the array and update the view
-window.electronAPI.onAppendPlugin((_event, pluginJson) => {
-
-    // Push on the array of all available plugin
-    availablePlugin.push(pluginJson);
-	createPluginEntry(pluginJson);
-});
-
-searchBar.addEventListener('input', (event) => {
-    // live search functionality code
-    let searchValue = event.target.value.trim().toLowerCase();
-    const filteredPlugin = availablePlugin.filter( (plugin) => {
-		// shall return true if we want to be display
-		var result = plugin['name'].toLowerCase().includes(searchValue);
-		if (plugin.hasOwnProperty('description')){
-			result ||= plugin['description'].toLowerCase().includes(searchValue);
-		}
-		return result;
-	});
-
-    renderPlugin(filteredPlugin);
-});
-
-const renderPlugin = (pluginList) => {
-    pluginListElement.innerHTML = ""; // Clear existing list
-
-    pluginList.forEach((plugin) => {
-    	createPluginEntry(plugin);
-    });
-};
-
-const createPluginEntry = (plugin) => {
-    // Create new element 'a'
-    const newEntry = document.createElement('a');
-    newEntry.href = "#"
-    let classesToAdd = [ 'nav-link', 'text-white'];
-    newEntry.classList.add(...classesToAdd);
-    newEntry.setAttribute('data-bs-toggle', 'tooltip');
-    newEntry.setAttribute('data-bs-placement', 'right');
-    newEntry.setAttribute('data-bs-animation', 'true');
-    newEntry.setAttribute('data-bs-title', plugin['description']);
-    newEntry.textContent = plugin['name'];
-
-    // and new li entry
-    const newLi = document.createElement('li');
-    //newLi.classList.add('nav-item');
-    newLi.appendChild(newEntry);
-
-    pluginListElement.appendChild(newLi);
-
-    // Initialize tooltips
-    new bootstrap.Tooltip(newEntry);
-};
+window.onresize = function() {
+    canvas.resize();
+}

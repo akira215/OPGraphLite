@@ -9,6 +9,7 @@ npm install --save-dev @electron-forge/cli
 npx electron-forge import
 npm install --save-dev bootstrap
 npm i bootstrap-icons
+npm install --save-dev litegraph.js
 
 
 npm install

@@ -46,3 +46,16 @@ main {
   pointer-events: none;
   color: #aaa;
 }
+
+/* Canvas style */
+#graphContainer{
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+#graph {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
