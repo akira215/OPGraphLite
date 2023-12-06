@@ -30,3 +30,17 @@ document.addEventListener("DOMContentLoaded", (event) => {
 window.onresize = function() {
     canvas.resize();
 }
+
+function onDrop(ev) {
+    const ind = ev.dataTransfer.getData('text');
+    const plugin = availablePlugin[ind]; // the plugin that has been dragged
+    
+	//console.log(plugin);
+	//Create the new node and attach it
+	var newNode = LiteGraph.createNode(plugin['name']);
+	newNode.pos = [ev.offsetX, ev.offsetY];
+	
+    graph.add(newNode);
+
+    ev.dataTransfer.clearData(); // re initialize the data transfer obj
+};

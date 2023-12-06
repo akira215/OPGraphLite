@@ -6,26 +6,31 @@ var availablePlugin = []; // List of JSON plugin object available on the hard di
 const pluginListElement = document.getElementById('pluginList')
 const searchBar = document.getElementById('search-bar');
 
-
+// Called by main to save before quit
 window.electronAPI.onAppQuit((event) => {
     event.sender.send('readyToQuit');
 });
 
-// as soon as the DOM is loaded, load the available plugin
+// as soon as the DOM is loaded, load the available plugin via Main
 document.addEventListener("DOMContentLoaded", (event) => {
-	window.electronAPI.openList();
-	console.log('trigger the plugin exploration')
+	window.electronAPI.loadPluginList();
 });
 
 
-// Add the new plugin entry in the array and update the view
+// Add the new plugin entry in the array and update the view, when Main discover a new one
 window.electronAPI.onAppendPlugin((_event, pluginJson) => {
 
-    // Push on the array of all available plugin
-    availablePlugin.push(pluginJson);
-	createPluginEntry(pluginJson);
+    
+    pluginJson['id'] = availablePlugin.length; // numbering the plugin
+    availablePlugin.push(pluginJson); // Push on the array of all available plugin
+
+    //createPluginNode(pluginJson); // create the litegraph object
+    LiteGraph.registerNodeType(pluginJson['name'], createPluginNode(pluginJson));
+    //PluginNode.prototype.title = pluginJson['name'];
+	createPluginEntry(pluginJson); // create the plugin on the sidebar
 });
 
+// Live filter the plugin list with the user entry
 searchBar.addEventListener('input', (event) => {
     // live search functionality code
     let searchValue = event.target.value.trim().toLowerCase();
@@ -41,24 +46,32 @@ searchBar.addEventListener('input', (event) => {
     renderPlugin(filteredPlugin);
 });
 
+// Render the plugin list in the side bar, depending on the search results
 const renderPlugin = (pluginList) => {
     pluginListElement.innerHTML = ""; // Clear existing list
+    
+    //console.log(pluginList);
 
     pluginList.forEach((plugin) => {
     	createPluginEntry(plugin);
     });
 };
 
+
+// Create the new DOM element for each plugin. Called during live search
 const createPluginEntry = (plugin) => {
     // Create new element 'a'
     const newEntry = document.createElement('a');
     newEntry.href = "#"
     let classesToAdd = [ 'nav-link', 'text-white'];
     newEntry.classList.add(...classesToAdd);
+    newEntry.setAttribute('plugin-index', plugin.id); // set an id to retrieve the entry in the list
     newEntry.setAttribute('data-bs-toggle', 'tooltip');
     newEntry.setAttribute('data-bs-placement', 'right');
     newEntry.setAttribute('data-bs-animation', 'true');
     newEntry.setAttribute('data-bs-title', plugin['description']);
+    newEntry.setAttribute('draggable', 'true');
+    newEntry.setAttribute('ondragstart', 'onDragStart(event)');
     newEntry.textContent = plugin['name'];
 
     // and new li entry
@@ -71,3 +84,63 @@ const createPluginEntry = (plugin) => {
     // Initialize tooltips
     new bootstrap.Tooltip(newEntry);
 };
+
+
+// Drag and drop plugin in Canva view
+function onDragStart(ev) {
+    ev.dataTransfer.setData("text", ev.target.getAttribute('plugin-index'));
+    //ev.currentTarget.style.backgroundColor = 'yellow';
+};
+
+function onDragOver(ev) {
+    ev.preventDefault();
+};
+/*
+function onDrop(ev) {
+    const ind = ev.dataTransfer.getData('text');
+    const plugin = availablePlugin[ind]; // the plugin that has been dragged
+    console.log(plugin);
+    var newNode = new PluginNode(plugin);
+
+    //const draggableElement = document.getElementById(id);
+    //const dropzone = ev.target;
+
+    ev.dataTransfer.clearData(); // re initialize the data transfer obj
+};
+
+*/
+// Custom Node creation. The created class will be instancied only when creating the node (during drop event)
+function createPluginNode(plugin){
+    class basePlugin {
+        constructor(){
+            //this.plugin = plugin;
+            if (plugin.hasOwnProperty('name')){
+                this.title = plugin['name'];
+            } else {
+                this.title = 'no name'
+            }
+            
+            if (plugin.hasOwnProperty('inputs')){
+                plugin['inputs'].forEach((input) => {
+                    this.addInput(input['name'],input['type']);
+                });
+            }
+            if (plugin.hasOwnProperty('outputs')){
+                plugin['outputs'].forEach((output) => {
+                    this.addOutput(output['name'],output['type']);
+                });
+            }
+            if (plugin.hasOwnProperty('properties')){
+                plugin['properties'].forEach((prop) => {
+                    this.properties(prop['name'],prop['default']);
+                });
+            }
+            console.log("Created" + plugin.name);
+        }
+        
+
+        onExecute(){
+        }
+    }
+    return basePlugin;
+}

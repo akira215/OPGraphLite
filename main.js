@@ -179,11 +179,12 @@ app.whenReady().then(() => {
 	createWindow()
 
 	//////////////////////////////////////////////TODEL
-	//mainWindow.webContents.openDevTools()
+	mainWindow.webContents.openDevTools()
 	//////////////////////////////////////////////TODEL
 	mainWindow.once('ready-to-show', () => {
 		//mainWindow.setMenu(null)
 		mainWindow.maximize();
+	
 		mainWindow.show() 
 		
 	});
@@ -221,7 +222,7 @@ app.whenReady().then(() => {
 
 	//ipcMain.handle('dialog:openList', generatePluginList)
 
-	ipcMain.on('openList', generatePluginList)
+	ipcMain.on('loadPluginList', generatePluginList)
 
 	ipcMain.on('notImplemented', (e)=>showNotification ('Not yet implemented bro', 'Hey, guy')); //TODO
 
