@@ -31,6 +31,7 @@ window.onresize = function() {
     canvas.resize();
 }
 
+// Drag an drop a new node in the canva
 function onDrop(ev) {
     const ind = ev.dataTransfer.getData('text');
     const plugin = availablePlugin[ind]; // the plugin that has been dragged
@@ -44,3 +45,17 @@ function onDrop(ev) {
 
     ev.dataTransfer.clearData(); // re initialize the data transfer obj
 };
+
+window.electronAPI.onLoad((data) => {
+    
+    if(data)
+        graph.configure( data );
+
+    // TODO add a check is a plugin is not installed to deal with notifications
+});
+
+// on save, trigger the saving of the graph
+window.electronAPI.onSave(() => {
+    var data = JSON.stringify( graph.serialize(), null, "\t" );
+    window.electronAPI.configObj(data);
+});

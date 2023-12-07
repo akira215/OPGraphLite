@@ -2,7 +2,6 @@
 
 var availablePlugin = []; // List of JSON plugin object available on the hard disk
 
-
 const pluginListElement = document.getElementById('pluginList')
 const searchBar = document.getElementById('search-bar');
 

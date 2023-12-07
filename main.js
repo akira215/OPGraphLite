@@ -1,24 +1,38 @@
 'use strict'
 
-const os = require('os')
-const path = require('path')
-const { app, BrowserWindow, ipcMain, globalShortcut, Menu, Notification} = require('electron')
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+const { app, BrowserWindow, ipcMain, globalShortcut, Menu, dialog, Notification} = require('electron');
 
 
 const pluginFolder = '../plugins/';
 const pluginFile = 'op_plugin.json';
 
-const config = require(path.join(__dirname, 'package.json'))
+const config = require(path.join(__dirname, 'package.json'));
 
-app.setName(config.productName)
-var mainWindow = null
+app.setName(config.productName);
+app.setAppUserModelId(config.productName); // for developpement
 
+var mainWindow = null;
+
+var currentFile = null;
+var appReady = false;
 
 const templateMenu = [
 	// { role: 'fileMenu' }
 	{
 		label: 'File',
 		submenu: [
+			{ label: 'Load', click: onLoad },
+			{ label: 'Save', click: onSave },
+			{ label: 'Save As', click: onSaveAs},
+			{ type: 'separator' },
+			{ label: 'Reload Window',
+  				accelerator: "CmdOrCtrl+R", 
+  				click: () => {mainWindow.reload();}
+			},
+			{ type: 'separator' },
 			{ role: 'quit' }
 		]
 	},
@@ -162,16 +176,6 @@ const createWindow = () => {
 	}
 }
 
-function showNotification (msg, title) {
-	const notification = {
-		title: title,
-		body: msg,
-		icon: path.join(__dirname, 'app','img', '68013_pin_orange_location_icon.png'),
-		urgency:'low' //'critical','normal'
-	}
-	new Notification(notification).show()
-}
-
 
 app.whenReady().then(() => {
 
@@ -189,7 +193,7 @@ app.whenReady().then(() => {
 		
 	});
 
-  mainWindow.onbeforeunload = (e) => {
+  	mainWindow.onbeforeunload = (e) => {
 		// Prevent Command-R from unloading the window contents.
 		e.returnValue = false
 	}
@@ -201,8 +205,6 @@ app.whenReady().then(() => {
 		}
 	});
 
-	
-  
 
 	app.on('activate', () => {
 		if (BrowserWindow.getAllWindows().length === 0) {
@@ -228,12 +230,27 @@ app.whenReady().then(() => {
 
 });
 
+// Kill the app when all windows are closed
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit()
+  }
+});
+
+
+function showNotification (msg, title, urg = 'low') {
+	const notification = {
+		title: title,
+		body: msg,
+		icon: path.join(__dirname, 'app','img', 'OPicon.png'),
+		urgency: urg //'critical','normal'
+	}
+	new Notification(notification).show()
+}
 
 // Generate the plugin list and send a signal to renderer each a time a new one is discover
 async function generatePluginList () {
-	
-	const fs = require('fs');
-	
+
 	fs.readdir(pluginFolder, (err, files) => {
 		try {
 			files.forEach(file => {
@@ -255,6 +272,8 @@ async function generatePluginList () {
 			console.error(err)
 		}
 	});
+
+	appReady = true;
 }
 
 //return true if the JSON object contain the minimum require value
@@ -266,10 +285,62 @@ function isValidPlugin(pluginJSON) {
 	return result;
 }
 
+// Function call by click on menu
+function onLoad(){
+	var filearray = dialog.showOpenDialogSync(mainWindow, { title: 'openPosit load config', 
+						filters: [{ name: 'Open Posit config file', extensions: ['json'] }],
+						properties: ['showHiddenFiles', 'openFile'] });
+	
+	if (!filearray)
+		return;
+	if (filearray.length == 0)
+		return;
+
+	currentFile = filearray[0];
+
+	let jsonData = require( currentFile);
+	// Trigger the render to load the datas
+	mainWindow.webContents.send('onLoad', jsonData);
+
+}
+
+// Function call by click on menu
+function onSaveAs(){
+	var filename = dialog.showSaveDialogSync(mainWindow, { title: 'openPosit save config', 
+						filters: [{ name: 'Open Posit config file', extensions: ['json'] }],
+						properties: ['showHiddenFiles', 'createDirectory', 'showOverwriteConfirmation'] });
+	
+	if (!filename)
+		return;
+	
+
+	currentFile = filename;
+	onSave();
+}
+
+// Call the render to stringify the JSON object
+function onSave(){
+	if (!currentFile){
+		showNotification ('Unable to save file, no file has been selected', 'Saving File', 'normal')
+		return;
+	}
+	mainWindow.webContents.send('onSave');
+}
 
 
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
-  }
+// Triggered by the render when JSON object is ready to be saved in a file
+ipcMain.on('onConfigObj', (_event, value) => {
+	if (!currentFile){
+		showNotification ('Unable to save file, no file has been selected', 'Saving File', 'normal')
+		return;
+	}
+	
+
+	fs.writeFile (currentFile, value, function(err) {
+		if (err) throw err;
+		console.log('complete');
+		}
+	);
+
+	console.log(value) // will print value to Node console
 });
