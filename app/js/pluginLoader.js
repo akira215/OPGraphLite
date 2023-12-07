@@ -107,6 +107,11 @@ function createPluginNode(plugin){
                 this.title = 'no name'
             }
             
+            this.color = '#353535';
+            if (plugin.hasOwnProperty('color')){
+                this.color = plugin['color'];
+            }
+
             if (plugin.hasOwnProperty('inputs')){
                 plugin['inputs'].forEach((input) => {
                     this.addInput(input['name'],input['type']);
@@ -170,13 +175,28 @@ function createPluginNode(plugin){
                     if (prop.hasOwnProperty('widget')){
                         widget = prop['widget'];
                     }
-                    console.log(options);
                     this.addWidget(widget,prop['name'], value, options); //this will modify the node.properties
                 });
             }
-            console.log("Created" + plugin.name);
+            //console.log("Created" + plugin.name);
         }
         
+        // color the node. onDrawForeground to be called in case of live view
+        onDrawBackground = function(ctx, graphcanvas){
+        if(this.flags.collapsed)
+            return;
+
+            //Background color
+            ctx.fillStyle = this.color;
+            ctx.roundRect(0, 0, this.size[0],this.size[1], 8);
+            ctx.fill();
+
+            // Separator
+            ctx.shadowColor = "transparent";
+			ctx.fillStyle = "rgba(0,0,0,0.2)";
+			ctx.fillRect(0, -1, this.size[0], 2);
+
+        }
 
         onExecute(){
         }
