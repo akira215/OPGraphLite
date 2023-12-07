@@ -261,8 +261,8 @@ async function generatePluginList () {
 function isValidPlugin(pluginJSON) {
 	let result = true;
 	result &&= pluginJSON.hasOwnProperty('name');
-	result &&= pluginJSON.hasOwnProperty('inputs');
-	result &&= pluginJSON.hasOwnProperty('outputs');
+	//result &&= pluginJSON.hasOwnProperty('inputs');
+	//result &&= pluginJSON.hasOwnProperty('outputs');
 	return result;
 }
 

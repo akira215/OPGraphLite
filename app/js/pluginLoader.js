@@ -95,20 +95,7 @@ function onDragStart(ev) {
 function onDragOver(ev) {
     ev.preventDefault();
 };
-/*
-function onDrop(ev) {
-    const ind = ev.dataTransfer.getData('text');
-    const plugin = availablePlugin[ind]; // the plugin that has been dragged
-    console.log(plugin);
-    var newNode = new PluginNode(plugin);
 
-    //const draggableElement = document.getElementById(id);
-    //const dropzone = ev.target;
-
-    ev.dataTransfer.clearData(); // re initialize the data transfer obj
-};
-
-*/
 // Custom Node creation. The created class will be instancied only when creating the node (during drop event)
 function createPluginNode(plugin){
     class basePlugin {
@@ -130,9 +117,61 @@ function createPluginNode(plugin){
                     this.addOutput(output['name'],output['type']);
                 });
             }
+
             if (plugin.hasOwnProperty('properties')){
                 plugin['properties'].forEach((prop) => {
-                    this.properties(prop['name'],prop['default']);
+                    this.addProperty = (prop['name'], prop['default']);
+
+                    // add widget to node
+                    var value = prop['default'];
+                    var options = { property: prop['name']};
+                    if (prop.hasOwnProperty('min')){
+                        options['min'] = prop['min'];
+                    }
+                    if (prop.hasOwnProperty('max')){
+                        options['max'] = prop['max'];
+                    }
+                    if (prop.hasOwnProperty('precision')){
+                        options['precision'] = prop['precision'];
+                        options['step'] = Math.pow(10,-prop['precision']) * 10;//Litegraph mutliply by 0.1 the step
+                    }
+                    if (prop.hasOwnProperty('step')){
+                        options['step'] = prop['step'] * 10; //Litegraph mutliply by 0.1 the step
+
+                    }
+                    // type of control
+                    var widget = "";
+                    if (prop.hasOwnProperty('type')){
+                        switch (prop['type']) {
+                            case 'number':
+                            case 'float':
+                            case 'double':
+                                widget = "number";
+                                break;
+                            case 'integer':
+                                widget = "number";
+                                options['precision'] = 0;
+                                options['step']  = 10;
+                                value = Math.trunc(value);
+                                break;
+                            case 'string':
+                            case 'text':
+                                widget = "text";
+                                break;
+                            case 'bool':
+                            case 'boolean':
+                                widget = "toggle";
+                                break;
+                            default:
+                                console.error('Type ' + prop['type'] +' is not correct in ' + plugin.name);
+                        }
+                              
+                    }
+                    if (prop.hasOwnProperty('widget')){
+                        widget = prop['widget'];
+                    }
+                    console.log(options);
+                    this.addWidget(widget,prop['name'], value, options); //this will modify the node.properties
                 });
             }
             console.log("Created" + plugin.name);
