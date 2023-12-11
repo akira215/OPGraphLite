@@ -24,14 +24,14 @@ const templateMenu = [
 	{
 		label: 'File',
 		submenu: [
-			{ label: 'Load', click: onLoad },
-			{ label: 'Save', click: onSave },
-			{ label: 'Save As', click: onSaveAs},
-			{ type: 'separator' },
-			{ label: 'Reload Window',
+			{ label: 'New',
   				accelerator: "CmdOrCtrl+R", 
   				click: () => {mainWindow.reload();}
 			},
+			{ type: 'separator' },
+			{ label: 'Load', click: onLoad },
+			{ label: 'Save', click: onSave },
+			{ label: 'Save As', click: onSaveAs},
 			{ type: 'separator' },
 			{ role: 'quit' }
 		]
