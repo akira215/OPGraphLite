@@ -10,6 +10,7 @@ npx electron-forge import
 npm install --save-dev bootstrap
 npm i bootstrap-icons
 npm install --save-dev litegraph.js
+npm install --save-dev koffi
 
 
 npm install

@@ -35,8 +35,9 @@ window.onresize = function() {
 function onDrop(ev) {
     const ind = ev.dataTransfer.getData('text');
     const plugin = availablePlugin[ind]; // the plugin that has been dragged
-    
-	//console.log(plugin);
+
+    loadPlugin(plugin);
+
 	//Create the new node and attach it
 	var newNode = LiteGraph.createNode(plugin['name']);
 	newNode.pos = [ev.offsetX, ev.offsetY];
@@ -45,6 +46,51 @@ function onDrop(ev) {
 
     ev.dataTransfer.clearData(); // re initialize the data transfer obj
 };
+
+// Load the plugin and load the function in the plugin object
+function loadPlugin(plugin) {
+    // This call will load the lib if required and return 
+    // the index of the function to be called in the function pointer array
+    // Find functions
+    if (!plugin.process) {
+
+            // check the input type
+            let inputsType =[];
+            if (plugin.hasOwnProperty('inputs'))
+                plugin['inputs'].forEach((input) => {
+                    if (input.hasOwnProperty('type'))
+                        inputsType.push(input['type']);
+                    else{
+                        console.error('error loading' + plugin['name'] + ': \'type\' property not found in input');
+                        console.error(inputs);
+                    }
+                });
+
+            //output type
+            //TODO change the implementation according to OP_plugin implementation
+            let outputsType = null;
+            if (plugin.hasOwnProperty('outputs'))
+                outputsType = plugin['outputs'][0].type
+            else
+                outputsType = 'void';
+
+            console.log(inputsType);
+
+            //TODO check if there are output, input, path, filename,...
+            // load the .dll o .so file
+            const lib = window.loadLib.loadLib(plugin.path + plugin.filename);
+
+            // find the function
+            let func = lib.stdcall(plugin.function, outputsType, inputsType);
+            plugin.process = func;
+            console.log(plugin.process(6,7));
+    } else {
+        console.log('already loaded');
+    }
+
+};
+
+
 
 window.electronAPI.onLoad((data) => {
     

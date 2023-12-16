@@ -10,7 +10,7 @@ function createPluginNode(plugin){
                 this.title = 'no name'
             }
             
-            this.color = '#353535';
+            this.color = '#353535'; // Defaut color
             if (plugin.hasOwnProperty('color')){
                 this.color = plugin['color'];
             }
@@ -48,6 +48,7 @@ function createPluginNode(plugin){
 
                     }
                     // type of control
+                    //TODO add combo type
                     var widget = "";
                     if (prop.hasOwnProperty('type')){
                         switch (prop['type']) {

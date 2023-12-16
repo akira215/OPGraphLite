@@ -4,7 +4,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { app, BrowserWindow, ipcMain, globalShortcut, Menu, dialog, Notification} = require('electron');
-
+const koffi = require('koffi'); // for dynamic lib load
 
 const pluginFolder = '../plugins/';
 const pluginFile = 'op_plugin.json';
@@ -149,6 +149,7 @@ const createWindow = () => {
     icon: path.join(__dirname, 'app','img', 'OPicon.png'),
     webPreferences: {
 			preload: path.join(__dirname, 'app','js','preload.js'),
+			sandbox: false,
 			//nodeIntegration: true,
 			//contextIsolation: true,
 			//enableRemoteModule: true,
@@ -224,7 +225,8 @@ app.whenReady().then(() => {
 
 	//ipcMain.handle('dialog:openList', generatePluginList)
 
-	ipcMain.on('loadPluginList', generatePluginList)
+	ipcMain.on('loadPluginList', generatePluginList);
+	ipcMain.on('loadPlugin', (e,p) => loadPlugin(e,p));
 
 	ipcMain.on('notImplemented', (e)=>showNotification ('Not yet implemented bro', 'Hey, guy')); //TODO
 
@@ -259,6 +261,8 @@ async function generatePluginList () {
 					if (fs.existsSync(pluginFolder + '/' + file + '/' + pluginFile)) {
 						let jsonData = require(pluginFolder + "/" + file + "/" + pluginFile);
 						if (isValidPlugin(jsonData)){
+							// Add the path to the JSON object
+							jsonData.path = pluginFolder + '/' + file + '/';
 							mainWindow.webContents.send('appendPlugin', jsonData);
 						} else {
 							console.error(pluginFolder + "/" + file + "/" + pluginFile + " is invalid" )
@@ -275,6 +279,8 @@ async function generatePluginList () {
 
 	appReady = true;
 }
+
+
 
 //return true if the JSON object contain the minimum require value
 function isValidPlugin(pluginJSON) {
