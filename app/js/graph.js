@@ -38,6 +38,8 @@ function onDrop(ev) {
 
     loadPlugin(plugin);
 
+    console.log(plugin.process(6,7));
+
 	//Create the new node and attach it
 	var newNode = LiteGraph.createNode(plugin['name']);
 	newNode.pos = [ev.offsetX, ev.offsetY];
@@ -74,8 +76,6 @@ function loadPlugin(plugin) {
             else
                 outputsType = 'void';
 
-            console.log(inputsType);
-
             //TODO check if there are output, input, path, filename,...
             // load the .dll o .so file
             const lib = window.loadLib.loadLib(plugin.path + plugin.filename);
@@ -83,7 +83,7 @@ function loadPlugin(plugin) {
             // find the function
             let func = lib.stdcall(plugin.function, outputsType, inputsType);
             plugin.process = func;
-            console.log(plugin.process(6,7));
+            
     } else {
         console.log('already loaded');
     }

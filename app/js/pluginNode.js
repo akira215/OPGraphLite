@@ -26,12 +26,16 @@ function createPluginNode(plugin){
                 });
             }
 
+            if (plugin.hasOwnProperty('process')){
+                this.process =  plugin['process'];
+            }
+
             if (plugin.hasOwnProperty('properties')){
                 plugin['properties'].forEach((prop) => {
-                    this.addProperty = (prop['name'], prop['default']);
+                    this.addProperty = (prop['name'], prop['value']);
 
                     // add widget to node
-                    var value = prop['default'];
+                    var value = prop['value'];
                     var options = { property: prop['name']};
                     if (prop.hasOwnProperty('min')){
                         options['min'] = prop['min'];
@@ -103,6 +107,25 @@ function createPluginNode(plugin){
         }
 
         onExecute(){
+
+            let args = [];
+
+            console.log(this.title);
+            
+            if (this.inputs) {
+                this.inputs.forEach((input,i)=>{
+                    let val = this.getInputData(i) || 0; // TODO add default value ? || 0
+                    args.push(val); 
+
+                });
+            }
+                
+            //console.log(...args);
+
+            //console.log(this.process(...args));
+            this.setOutputData(0,this.process(...args));
+
+            
         }
     }
     return basePlugin;
